@@ -3,7 +3,56 @@ version: "3"
 
 services:
 
-  webapp:
+  app:
+    container_name: app
+    # restart: always
     build: .
+    command: >
+      bash -c
+      "python3 manage.py init_db &&
+      gunicorn -w4 -b 127.0.0.1:5000 --log-level=debug manage:app"
+    volumes:
+      - .:/code
+    networks:
+      - app_net
+      - db_net
+    depends_on:
+      - mysql
+    expose:
+      - 5000
+
+  nginx:
+    container_name: nginx
+    # restart: always
+    image: nginx:latest
     ports:
-    - "80:80"
+      - "8000:8000"
+    volumes:
+     - ./nginx:/etc/nginx/conf.d
+     - ./app/templates:/etc/nginx/html
+     - ./app/static:/etc/nginx/html/static
+
+    depends_on:
+      - app
+    networks:
+      - app_net
+
+  mysql:
+    container_name: mysql
+    restart: always
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=2020012402
+      - MYSQL_DATABASE=thss
+      - TZ=Asia/Shanghai
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    expose:
+      - 3306
+    networks:
+      - db_net
+
+networks:
+  app_net:
+    driver: bridge
+  db_net:
+    driver: bridge
