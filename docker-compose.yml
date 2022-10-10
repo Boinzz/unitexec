@@ -1,1 +1,9 @@
 # TODO: 补充docker compose配置文件
+version: "3"
+
+services:
+
+  webapp:
+    build: .
+    ports:
+    - "80:80"
