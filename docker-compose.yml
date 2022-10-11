@@ -5,12 +5,9 @@ services:
 
   app:
     container_name: app
-    # restart: always
+    restart: always
     build: .
-    command: >
-      bash -c
-      "python3 manage.py init_db &&
-      gunicorn -w4 -b 127.0.0.1:5000 --log-level=debug manage:app"
+    command: "gunicorn -w4 -b 0.0.0.0:5000 --log-level=debug manage:app"
     volumes:
       - .:/code
     networks:
@@ -23,7 +20,7 @@ services:
 
   nginx:
     container_name: nginx
-    # restart: always
+    restart: always
     image: nginx:latest
     ports:
       - "8000:8000"
